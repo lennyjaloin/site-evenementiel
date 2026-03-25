@@ -4,9 +4,9 @@ import { users } from '../schema.js';
 import { eq } from 'drizzle-orm';
 
 const User = {
-  async create({ username, email, password_hash, role = 'staff', is_active = 1 }) {
-    await db.insert(users).values({ username, email, password_hash, role, is_active });
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+  async create({ username = null, email, password_hash, role = 'staff', is_active = 1 }) {
+    const [result] = await db.insert(users).values({ username, email, password_hash, role, is_active });
+    const [user] = await db.select().from(users).where(eq(users.id, result.insertId));
     return user;
   },
 

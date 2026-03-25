@@ -1,12 +1,15 @@
 {
   "name": "backend_complete",
   "version": "1.0.0",
-  "description": "",
+  "description": "API du site evenementiel BTS SIO",
   "main": "server.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "start": "node server.mjs",
-    "dev": "nodemon server.mjs"
+    "dev": "nodemon server.mjs",
+    "prod": "set NODE_ENV=production && node server.mjs",
+    "db:init": "node createTables.js"
   },
   "keywords": [],
   "author": "",
@@ -18,11 +21,15 @@
     "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.6",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.15.2"
+    "mysql2": "^3.15.2",
+    "zod": "^3.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.0"
   },
   "type": "module"
 }

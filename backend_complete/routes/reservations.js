@@ -3,13 +3,13 @@ import express from 'express';
 import { createReservation, listReservations, deleteReservation } from '../controllers/reservationController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { requireRole } from '../middleware/roleMiddleware.js';
+import { validate } from '../middleware/validate.js';
+import { createReservationSchema } from '../validators/index.js';
+import { reservationLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
-// Public: réserver sans compte
-router.post('/', createReservation);
-
-// Admin: voir/supprimer les réservations
+router.post('/', reservationLimiter, validate(createReservationSchema), createReservation);
 router.get('/', authMiddleware, requireRole('admin'), listReservations);
 router.delete('/:id', authMiddleware, requireRole('admin'), deleteReservation);
 

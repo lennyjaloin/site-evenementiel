@@ -1,10 +1,12 @@
 // controllers/eventController.js
-import { Event } from '../models/index.js';
+import Event from '../models/Event.js';
+import { parsePagination, paginatedResponse } from '../utils/paginate.js';
 
 export const listEvents = async (req, res, next) => {
   try {
-    const all = await Event.getAll();
-    res.json(all);
+    const { page, limit, offset } = parsePagination(req.query);
+    const { data, total } = await Event.getAllPaginated({ limit, offset });
+    res.json(paginatedResponse(data, total, page, limit));
   } catch (err) { next(err); }
 };
 
@@ -28,10 +30,6 @@ export const createEvent = async (req, res, next) => {
       image_url = null,
       is_public = 1
     } = req.body;
-
-    if (!title || !description) {
-      return res.status(400).json({ message: "Titre et description obligatoires" });
-    }
 
     const created = await Event.create({
       title,

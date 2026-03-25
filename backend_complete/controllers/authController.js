@@ -1,52 +1,26 @@
 // controllers/authController.js
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { User } from '../models/index.js';
 
 export const register = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const existing = await User.findByEmail(email);
+    if (existing) return res.status(409).json({ message: 'Email deja existant' });
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email et mot de passe obligatoires" });
-    }
+    const password_hash = await bcrypt.hash(password, 8);
+    const user = await User.create({ email, password_hash });
 
-    // Email unique
-    const exist = await User.findByEmail(email);
-    if (exist) {
-      return res.status(409).json({ message: "Email déjà existant" });
-    }
-
-    // Username automatique depuis l'email (avant le @)
-    let baseUsername = String(email).split("@")[0].slice(0, 60);
-    if (!baseUsername) baseUsername = "user";
-    // Petit suffixe pour éviter les collisions de username
-    const username = (baseUsername + "_" + Math.floor(Math.random() * 10000)).slice(0, 60);
-
-    const hash = await bcrypt.hash(password, 10);
-
-    // Par défaut on crée un compte "staff" (ou change en "admin" si tu veux)
-    const newUser = await User.create({ username, email, password_hash: hash, role: "staff", is_active: 1 });
-
-    // Auto-login : on renvoie un token comme /login
-    const token = jwt.sign(
-      { userId: newUser.id, role: newUser.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.status(201).json({
-      token,
-      user: { id: newUser.id, email: newUser.email, role: newUser.role }
-    });
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.status(201).json({ token, user });
   } catch (err) {
+    if (err?.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'Email deja existant' });
+    }
     next(err);
   }
 };
-
 
 export const login = async (req, res, next) => {
   try {
@@ -57,16 +31,8 @@ export const login = async (req, res, next) => {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ message: 'Identifiants invalides' });
 
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.json({
-      token,
-      user: { id: user.id, email: user.email, role: user.role }
-    });
+    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user });
   } catch (err) {
     next(err);
   }

@@ -1,39 +1,21 @@
-import express from "express";
-import { poolDirect } from "../db.js";
+// routes/events.js
+import express from 'express';
+import {
+  listEvents,
+  getEvent,
+  createEvent,
+  updateEvent,
+  deleteEvent
+} from '../controllers/eventController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+import { requireRole } from '../middleware/roleMiddleware.js';
 
 const router = express.Router();
 
-// GET /api/events?q=&location=&date=
-router.get("/", async (req, res) => {
-  try {
-    const { q, location, date } = req.query;
-
-    let sql = "SELECT * FROM events WHERE 1=1";
-    const params = [];
-
-    if (q) {
-      sql += " AND title LIKE ?";
-      params.push(`%${q}%`);
-    }
-
-    if (location) {
-      sql += " AND location LIKE ?";
-      params.push(`%${location}%`);
-    }
-
-    if (date) {
-      sql += " AND date >= ? AND date < DATE_ADD(?, INTERVAL 1 DAY)";
-      params.push(`${date} 00:00:00`, `${date} 00:00:00`);
-    }
-
-    sql += " ORDER BY date ASC";
-
-const [rows] = await poolDirect.query(sql, params);
-    res.json(rows);
-  } catch (err) {
-    console.error("Erreur /api/events :", err);
-    res.status(500).json({ message: "Erreur serveur événements" });
-  }
-});
+router.get('/', listEvents);
+router.get('/:id', getEvent);
+router.post('/', authMiddleware, requireRole('admin'), createEvent);
+router.put('/:id', authMiddleware, requireRole('admin'), updateEvent);
+router.delete('/:id', authMiddleware, requireRole('admin'), deleteEvent);
 
 export default router;

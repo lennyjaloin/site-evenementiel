@@ -8,9 +8,9 @@ const Inscription = {
     const exist = await db.select().from(inscriptions)
       .where(and(eq(inscriptions.user_id, user_id), eq(inscriptions.event_id, event_id)));
     if (exist.length) return null; // déjà inscrit
-    await db.insert(inscriptions).values({ user_id, event_id, status: 'confirmed' });
-    const [insc] = await db.select().from(inscriptions)
-      .where(and(eq(inscriptions.user_id, user_id), eq(inscriptions.event_id, event_id)));
+
+    const [result] = await db.insert(inscriptions).values({ user_id, event_id, status: 'confirmed' });
+    const [insc] = await db.select().from(inscriptions).where(eq(inscriptions.id, result.insertId));
     return insc;
   },
 

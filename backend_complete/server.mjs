@@ -1,31 +1,20 @@
-// server.js
-import express from 'express';
-import cors from 'cors';
+// server.mjs
 import dotenv from 'dotenv';
 dotenv.config();
 
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
-import eventRoutes from './routes/events.js';
-import inscriptionRoutes from './routes/inscriptions.js';
-import reservationRoutes from './routes/reservations.js';
-import paymentRoutes from './routes/payments.js';
-import { errorHandler } from './middleware/errorMiddleware.js';
+// Vérification des variables d'environnement obligatoires
+const requiredEnv = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'JWT_SECRET'];
+const missing = requiredEnv.filter(key => !process.env[key]);
+if (missing.length > 0) {
+  console.error(`ERREUR: Variables d'environnement manquantes : ${missing.join(', ')}`);
+  console.error('Copie .env.example vers .env et remplis les valeurs.');
+  process.exit(1);
+}
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+import app from './app.js';
+import { globalLimiter } from './middleware/rateLimiter.js';
 
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/inscriptions', inscriptionRoutes);
-app.use('/api/reservations', reservationRoutes);
-app.use('/api/payments', paymentRoutes);
-
-app.get('/', (req, res) => res.send('API OK'));
-
-app.use(errorHandler);
+app.use(globalLimiter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

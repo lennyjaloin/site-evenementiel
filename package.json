@@ -1,6 +1,14 @@
 {
-  "dependencies": {
-    "git": "^0.1.5",
-    "github": "^14.0.0"
+  "name": "site-evenementiel",
+  "private": true,
+  "scripts": {
+    "dev:web": "npm --prefix frontend_complete/web run dev",
+    "build:web": "npm --prefix frontend_complete/web run build",
+    "preview:web": "npm --prefix frontend_complete/web run preview",
+    "dev:mobile": "start_mobile.bat",
+    "mobile:android": "npm --prefix frontend_complete/mobile run android",
+    "mobile:ios": "npm --prefix frontend_complete/mobile run ios",
+    "dev:backend": "npm --prefix backend_complete run dev",
+    "start:backend": "npm --prefix backend_complete run start"
   }
 }

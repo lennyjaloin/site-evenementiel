@@ -1,0 +1,78 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getEvent } from "../services/api.js";
+import ReserveModal from "../components/ReserveModal.jsx";
+import { motion } from "framer-motion";
+
+export default function EventDetails() {
+  const { id } = useParams();
+  const [ev, setEv] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getEvent(id);
+        setEv(data);
+      } catch (e) {
+        setErr(e.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  if (loading) return <div className="container-app py-8 text-neutral-400">Chargement...</div>;
+  if (err) return <div className="container-app py-8 text-danger">{err}</div>;
+  if (!ev) return null;
+
+  const date = ev.date_start || ev.date;
+  const isComplet = ev.capacity != null && ev.placesRestantes != null && ev.placesRestantes <= 0;
+
+  return (
+    <section className="container-app py-6 sm:py-8">
+      <motion.div className="card p-5 sm:p-6 md:p-8" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="flex-1">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">{ev.title}</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {ev.location && <span className="badge">{ev.location}</span>}
+              {date && <span className="badge">{new Date(date).toLocaleString()}</span>}
+              {ev.capacity != null && (
+                <span className={`badge ${isComplet ? 'bg-danger/20 text-danger' : 'bg-ok/20 text-ok'}`}>
+                  {isComplet
+                    ? 'COMPLET'
+                    : `${ev.reservationsCount || 0}/${ev.capacity} places`
+                  }
+                </span>
+              )}
+            </div>
+          </div>
+
+          {isComplet ? (
+            <button disabled className="btn-secondary self-start opacity-50 cursor-not-allowed w-full sm:w-auto">
+              Complet
+            </button>
+          ) : (
+            <button onClick={()=>setOpen(true)} className="btn-primary self-start w-full sm:w-auto">
+              Reserver
+            </button>
+          )}
+        </div>
+
+        <p className="text-neutral-200 mt-4 sm:mt-6 whitespace-pre-line text-sm sm:text-base">{ev.description}</p>
+
+        {ev.placesRestantes != null && !isComplet && (
+          <p className="text-xs sm:text-sm text-ok mt-4">
+            {ev.placesRestantes} place{ev.placesRestantes > 1 ? 's' : ''} restante{ev.placesRestantes > 1 ? 's' : ''}
+          </p>
+        )}
+      </motion.div>
+
+      <ReserveModal open={open} onClose={()=>setOpen(false)} eventId={ev.id} />
+    </section>
+  );
+}

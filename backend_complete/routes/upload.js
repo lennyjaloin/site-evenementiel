@@ -24,7 +24,10 @@ const upload = multer({
 
 router.post('/', authMiddleware, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'Aucun fichier reçu' });
-  const url = `/uploads/${req.file.filename}`;
+  const base = process.env.RAILWAY_PUBLIC_DOMAIN
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+    : `${req.protocol}://${req.get('host')}`;
+  const url = `${base}/uploads/${req.file.filename}`;
   res.json({ url });
 });
 

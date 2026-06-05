@@ -47,14 +47,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/api', (req, res) => res.json({ status: 'API OK' }));
 
-// Frontend statique (prod)
-if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.join(__dirname, '..', 'frontend_complete', 'web', 'dist');
-  app.use(express.static(frontendPath));
-  app.get('/{*splat}', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
-  });
-}
 
 app.use(errorHandler);
 

@@ -17,7 +17,7 @@ export default function Signup() {
     try {
       setLoading(true);
       await signup(email, password);
-      nav("/events");
+      nav("/");
     } catch (e2) {
       setErr(e2.message);
     } finally {

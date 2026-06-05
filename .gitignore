@@ -1,0 +1,11 @@
+node_modules
+frontend_complete/web/node_modules
+frontend_complete/web/dist
+frontend_complete/node_modules
+frontend_complete/mobile/node_modules
+frontend_complete/mobile/.expo
+frontend_complete/mobile/dist
+frontend_complete/mobile/web-build
+backend_complete/node_modules
+backend_complete/.env
+backend_complete/uploads

@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Site Evenementiel",
+    "slug": "site-evenementiel-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D1B2A"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

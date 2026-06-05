@@ -1,0 +1,4 @@
+{
+  "outputDirectory": "frontend_complete/web/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

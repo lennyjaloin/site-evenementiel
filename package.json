@@ -2,6 +2,7 @@
   "name": "site-evenementiel",
   "private": true,
   "scripts": {
+    "build": "npm --prefix frontend_complete/web run build",
     "dev:web": "npm --prefix frontend_complete/web run dev",
     "build:web": "npm --prefix frontend_complete/web run build",
     "preview:web": "npm --prefix frontend_complete/web run preview",

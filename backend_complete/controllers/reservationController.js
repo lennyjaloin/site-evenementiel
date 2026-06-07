@@ -18,7 +18,7 @@ export const createReservation = async (req, res, next) => {
       return res.status(err.status).json({ message: err.message });
     }
     // Erreur d'unicité MySQL (double réservation)
-    if (err?.code === 'ER_DUP_ENTRY') {
+    if (err?.code === 'ER_DUP_ENTRY' || err?.errno === 1062) {
       return res.status(400).json({ message: 'Déjà réservé avec cet email.' });
     }
     next(err);

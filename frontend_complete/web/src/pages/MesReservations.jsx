@@ -54,14 +54,14 @@ export default function MesReservations() {
                 <p className="font-semibold">{r.nom} {r.prenom}</p>
                 <p className="text-xs text-neutral-400 mt-0.5">{r.email}</p>
                 <p className="text-xs text-neutral-500 mt-1">
-                  Réservé le {new Date(r.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                  Réservé le {new Date(r.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className={`text-xs px-2 py-1 rounded-full font-semibold ${r.status === "confirmed" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
                   {r.status === "confirmed" ? "Confirmée" : "Annulée"}
                 </span>
-                <Link to={`/events/${r.event_id}`} className="btn-secondary text-xs">
+                <Link to={`/events/${r.eventId}`} className="btn-secondary text-xs">
                   Voir l'événement
                 </Link>
               </div>

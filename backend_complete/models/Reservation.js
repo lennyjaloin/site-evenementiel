@@ -53,6 +53,15 @@ const Reservation = {
       .orderBy(desc(reservations.created_at));
   },
 
+  async findById(id) {
+    const [row] = await db.select().from(reservations).where(eq(reservations.id, id));
+    return row;
+  },
+
+  async cancel(id) {
+    return db.update(reservations).set({ status: 'cancelled' }).where(eq(reservations.id, id));
+  },
+
   async delete(id) {
     return db.delete(reservations).where(eq(reservations.id, id));
   },

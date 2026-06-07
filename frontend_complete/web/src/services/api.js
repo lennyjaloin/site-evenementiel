@@ -96,6 +96,11 @@ export async function getReservations() {
   return Array.isArray(data) ? data : (data.reservations || []);
 }
 
+export async function cancelReservation(id) {
+  const { data } = await api.patch(`/api/reservations/${id}/cancel`);
+  return data;
+}
+
 export async function deleteReservation(id) {
   const { data } = await api.delete(`/api/reservations/${id}`);
   return data;

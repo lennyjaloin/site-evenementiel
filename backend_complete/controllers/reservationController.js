@@ -1,5 +1,6 @@
 // controllers/reservationController.js
 import Reservation from '../models/Reservation.js';
+import User from '../models/User.js';
 
 export const createReservation = async (req, res, next) => {
   try {
@@ -29,6 +30,28 @@ export const listReservations = async (req, res, next) => {
   try {
     const rows = await Reservation.getAll();
     res.json(rows);
+  } catch (err) { next(err); }
+};
+
+export const cancelReservation = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const reservation = await Reservation.findById(id);
+    if (!reservation) return res.status(404).json({ message: 'Réservation introuvable' });
+
+    if (req.user.role !== 'admin') {
+      const user = await User.findById(req.user.id);
+      if (!user || user.email !== reservation.email) {
+        return res.status(403).json({ message: 'Accès refusé' });
+      }
+    }
+
+    if (reservation.status === 'cancelled') {
+      return res.status(400).json({ message: 'Réservation déjà annulée' });
+    }
+
+    await Reservation.cancel(id);
+    res.json({ message: 'Réservation annulée' });
   } catch (err) { next(err); }
 };
 

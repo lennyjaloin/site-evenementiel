@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { getReservations } from "../services/api.js";
+import { getReservations, cancelReservation } from "../services/api.js";
 import { Link } from "react-router-dom";
 
 export default function MesReservations() {
@@ -20,6 +20,16 @@ export default function MesReservations() {
       finally { setLoading(false); }
     })();
   }, [isAuthed, user]);
+
+  const onCancel = async (id) => {
+    if (!confirm("Annuler cette réservation ?")) return;
+    try {
+      await cancelReservation(id);
+      setReservations(prev => prev.map(r => r.id === id ? { ...r, status: "cancelled" } : r));
+    } catch (e) {
+      alert(e.response?.data?.message || e.message);
+    }
+  };
 
   if (!isAuthed) return (
     <div className="container-app py-16 text-center">
@@ -64,6 +74,11 @@ export default function MesReservations() {
                 <Link to={`/events/${r.eventId}`} className="btn-secondary text-xs">
                   Voir l'événement
                 </Link>
+                {r.status === "confirmed" && (
+                  <button onClick={() => onCancel(r.id)} className="btn-ghost text-danger text-xs">
+                    Annuler
+                  </button>
+                )}
               </div>
             </div>
           ))}

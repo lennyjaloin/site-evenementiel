@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import { motion } from "framer-motion";
@@ -12,7 +12,14 @@ export default function Layout() {
   const { user, isAuthed, logout } = useAuth();
   const { favs } = useFavorites();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const adminTabClass = (tabValue) => {
+    const isActive = location.pathname === "/admin" && new URLSearchParams(location.search).get("tab") === tabValue;
+    return "px-3 py-2 rounded-lg transition text-sm " +
+      (isActive ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white");
+  };
 
   const close = () => setMobileMenuOpen(false);
 
@@ -47,8 +54,8 @@ export default function Layout() {
                 </span>
               )}
             </NavLink>
-            {isAuthed && <NavLink to="/admin?tab=mine" className={linkClass}>Mes événements</NavLink>}
-            {user?.role === 'admin' && <NavLink to="/admin?tab=all" className={linkClass}>Tous les événements</NavLink>}
+            {isAuthed && <NavLink to="/admin?tab=mine" className={adminTabClass("mine")}>Mes événements</NavLink>}
+            {user?.role === 'admin' && <NavLink to="/admin?tab=all" className={adminTabClass("all")}>Tous les événements</NavLink>}
           </nav>
 
           {/* Auth Desktop */}
@@ -92,14 +99,17 @@ export default function Layout() {
                 { to: "/", label: "Accueil", end: true },
                 { to: "/mes-reservations", label: "Mes réservations" },
                 { to: "/favoris", label: `Favoris${favs.length > 0 ? ` (${favs.length})` : ""}` },
-                ...(isAuthed ? [{ to: "/admin?tab=mine", label: "Mes événements" }] : []),
-                ...(user?.role === 'admin' ? [{ to: "/admin?tab=all", label: "Tous les événements" }] : []),
-              ].map(({ to, label, end }) => (
+                ...(isAuthed ? [{ to: "/admin?tab=mine", label: "Mes événements", adminTab: "mine" }] : []),
+                ...(user?.role === 'admin' ? [{ to: "/admin?tab=all", label: "Tous les événements", adminTab: "all" }] : []),
+              ].map(({ to, label, end, adminTab }) => (
                 <NavLink key={to} to={to} end={end} onClick={close}
-                  className={({ isActive }) =>
-                    "px-3 py-2 rounded-lg transition block text-sm " +
-                    (isActive ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white")
-                  }
+                  className={({ isActive }) => {
+                    const active = adminTab
+                      ? (location.pathname === "/admin" && new URLSearchParams(location.search).get("tab") === adminTab)
+                      : isActive;
+                    return "px-3 py-2 rounded-lg transition block text-sm " +
+                      (active ? "bg-white/10 text-white" : "text-neutral-300 hover:bg-white/5 hover:text-white");
+                  }}
                 >
                   {label}
                 </NavLink>

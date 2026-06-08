@@ -12,7 +12,8 @@ const Event = {
     date_end = null,
     capacity = null,
     image_url = null,
-    is_public = 1
+    is_public = 1,
+    created_by = null
   }) {
     const [result] = await db.insert(events).values({
       title,
@@ -22,7 +23,8 @@ const Event = {
       date_end,
       capacity,
       image_url,
-      is_public
+      is_public,
+      created_by
     });
     const [event] = await db
       .select()

@@ -81,6 +81,11 @@ export async function createEvent(payload) {
   return data.event || data;
 }
 
+export async function updateEvent(id, payload) {
+  const { data } = await api.put(`/api/events/${id}`, payload);
+  return data.event || data;
+}
+
 export async function deleteEvent(id) {
   const { data } = await api.delete(`/api/events/${id}`);
   return data;

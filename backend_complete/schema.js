@@ -34,6 +34,7 @@ export const events = mysqlTable('events', {
   capacity: int('capacity'),
   image_url: varchar('image_url', { length: 255 }),
   is_public: int('is_public').notNull().default(1),
+  created_by: int('created_by'),
   created_at: timestamp('created_at').notNull().defaultNow(),
   updated_at: timestamp('updated_at').notNull().defaultNow(),
 });

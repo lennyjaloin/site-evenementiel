@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminTable from "../components/AdminTable.jsx";
-import { createEvent, deleteEvent, getEvents, getReservations, deleteReservation, uploadImage } from "../services/api.js";
+import { createEvent, updateEvent, deleteEvent, getEvents, getReservations, deleteReservation, uploadImage } from "../services/api.js";
+import { useAuth } from "../context/AuthContext.jsx";
 import { motion } from "framer-motion";
 
 export default function Admin() {
+  const { user } = useAuth();
   const [tab, setTab] = useState("events"); // events | reservations
+  const [editingId, setEditingId] = useState(null);
   const [reservations, setReservations] = useState([]);
   const [events, setEvents] = useState([]);
   const [filterEventId, setFilterEventId] = useState("");
@@ -45,17 +48,17 @@ export default function Admin() {
 
   const rows = useMemo(() => {
     const filtered = filterEventId
-      ? reservations.filter(r => String(r.event_id) === String(filterEventId))
+      ? reservations.filter(r => String(r.eventId) === String(filterEventId))
       : reservations;
 
     return filtered.map(r => ({
       id: r.id,
-      event: events.find(e => e.id === r.event_id)?.title || r.event_id,
+      event: r.eventTitle || events.find(e => e.id === r.eventId)?.title || r.eventId,
       nom: r.nom,
       prenom: r.prenom,
       email: r.email,
       status: r.status,
-      created_at: r.created_at
+      created_at: r.createdAt
     }));
   }, [reservations, events, filterEventId]);
 
@@ -79,6 +82,46 @@ export default function Admin() {
     }
   };
 
+  const resetForm = () => {
+    setEditingId(null);
+    setTitle(""); setDescription(""); setLocation("");
+    setDateStart(""); setTimeStartH("00"); setTimeStartM("00");
+    setDateEnd(""); setTimeEndH("00"); setTimeEndM("00");
+    setCapacity(""); setImageUrl(""); setImagePreview(null);
+    setIsPublic(true);
+  };
+
+  const splitDateTime = (value) => {
+    if (!value) return { date: "", h: "00", m: "00" };
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return { date: "", h: "00", m: "00" };
+    const pad = (n) => String(n).padStart(2, "0");
+    return {
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      h: pad(d.getHours()),
+      m: pad(Math.floor(d.getMinutes() / 15) * 15)
+    };
+  };
+
+  const onEditEvent = (ev) => {
+    setEditingId(ev.id);
+    setTitle(ev.title || "");
+    setDescription(ev.description || "");
+    setLocation(ev.location || "");
+    setCapacity(ev.capacity != null ? String(ev.capacity) : "");
+    setImageUrl(ev.image_url || "");
+    setImagePreview(ev.image_url || null);
+    setIsPublic(!!ev.is_public);
+
+    const start = splitDateTime(ev.date_start);
+    setDateStart(start.date); setTimeStartH(start.h); setTimeStartM(start.m);
+    const end = splitDateTime(ev.date_end);
+    setDateEnd(end.date); setTimeEndH(end.h); setTimeEndM(end.m);
+
+    setFormMsg("");
+    setTab("events");
+  };
+
   const onCreateEvent = async (e) => {
     e.preventDefault(); setFormMsg(""); setErr("");
     try {
@@ -92,14 +135,17 @@ export default function Admin() {
         image_url: imageUrl || null,
         is_public: isPublic ? 1 : 0
       };
-      const created = await createEvent(payload);
-      setEvents(prev => [created, ...prev]);
-      setTitle(""); setDescription(""); setLocation("");
-      setDateStart(""); setTimeStartH("00"); setTimeStartM("00");
-      setDateEnd(""); setTimeEndH("00"); setTimeEndM("00");
-      setCapacity(""); setImageUrl(""); setImagePreview(null);
-      setIsPublic(true);
-      setFormMsg("Evenement cree");
+
+      if (editingId) {
+        const updated = await updateEvent(editingId, payload);
+        setEvents(prev => prev.map(e2 => e2.id === editingId ? { ...e2, ...updated } : e2));
+        setFormMsg("Evenement modifie");
+      } else {
+        const created = await createEvent(payload);
+        setEvents(prev => [created, ...prev]);
+        setFormMsg("Evenement cree");
+      }
+      resetForm();
       setTab("events");
     } catch (e2) {
       setErr(e2.message);
@@ -129,7 +175,12 @@ export default function Admin() {
       {!loading && tab==="events" && (
         <div className="grid lg:grid-cols-2 gap-4">
           <div className="card p-5">
-            <h3 className="font-semibold text-lg mb-3">Creer un evenement</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-lg">{editingId ? "Modifier l'evenement" : "Creer un evenement"}</h3>
+              {editingId && (
+                <button type="button" onClick={resetForm} className="btn-ghost text-xs">Annuler la modification</button>
+              )}
+            </div>
             <form onSubmit={onCreateEvent} className="space-y-3">
               <div>
                 <label className="label">Titre</label>
@@ -221,7 +272,9 @@ export default function Admin() {
 
               {formMsg && <p className="text-ok text-sm">{formMsg}</p>}
 
-              <button className="btn-primary w-full" disabled={uploading}>{uploading ? "Envoi photo..." : "Creer"}</button>
+              <button className="btn-primary w-full" disabled={uploading}>
+                {uploading ? "Envoi photo..." : (editingId ? "Enregistrer les modifications" : "Creer")}
+              </button>
             </form>
           </div>
 
@@ -234,7 +287,12 @@ export default function Admin() {
                     <div className="font-semibold">{ev.title}</div>
                     <div className="text-xs text-neutral-400">{ev.location || "-"} � {ev.date_start ? new Date(ev.date_start).toLocaleString() : "date libre"}</div>
                   </div>
-                  <button onClick={()=>onDeleteEvent(ev.id)} className="btn-ghost text-danger">Suppr.</button>
+                  <div className="flex gap-2 shrink-0">
+                    {(ev.created_by === user?.id || user?.role === 'admin') && (
+                      <button onClick={()=>onEditEvent(ev)} className="btn-ghost text-xs sm:text-sm">Modifier</button>
+                    )}
+                    <button onClick={()=>onDeleteEvent(ev.id)} className="btn-ghost text-danger">Suppr.</button>
+                  </div>
                 </div>
               ))}
               {events.length===0 && <p className="text-neutral-400 text-sm">Aucun evenement.</p>}

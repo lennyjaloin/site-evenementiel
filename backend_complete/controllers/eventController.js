@@ -40,7 +40,8 @@ export const createEvent = async (req, res, next) => {
       date_end,
       capacity,
       image_url,
-      is_public
+      is_public,
+      created_by: req.user.id
     });
 
     res.status(201).json(created);
@@ -50,7 +51,26 @@ export const createEvent = async (req, res, next) => {
 export const updateEvent = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const updated = await Event.update(id, req.body);
+    const event = await Event.findById(id);
+    if (!event) return res.status(404).json({ message: 'Événement introuvable' });
+
+    if (req.user.role !== 'admin' && event.created_by !== req.user.id) {
+      return res.status(403).json({ message: 'Accès refusé' });
+    }
+
+    const allowedFields = ['title', 'description', 'location', 'capacity', 'image_url', 'is_public'];
+    const payload = {};
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) payload[key] = req.body[key];
+    }
+    if (req.body.date_start !== undefined) {
+      payload.date_start = req.body.date_start ? new Date(req.body.date_start) : null;
+    }
+    if (req.body.date_end !== undefined) {
+      payload.date_end = req.body.date_end ? new Date(req.body.date_end) : null;
+    }
+
+    const updated = await Event.update(id, payload);
     res.json(updated);
   } catch (err) { next(err); }
 };

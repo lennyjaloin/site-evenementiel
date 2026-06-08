@@ -8,9 +8,8 @@ export default function ReserveSuccess() {
         <p className="text-sm sm:text-base text-neutral-300">
           Tu vas recevoir un mail de confirmation si ton backend gère l'envoi.
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-3 mt-3">
-          <Link to="/events" className="btn-primary justify-center">Retour aux événements</Link>
-          <Link to="/" className="btn-secondary justify-center">Accueil</Link>
+        <div className="flex justify-center mt-3">
+          <Link to="/" className="btn-primary justify-center">Retourner à l'accueil</Link>
         </div>
       </div>
     </section>

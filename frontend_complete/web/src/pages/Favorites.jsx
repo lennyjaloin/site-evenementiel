@@ -1,9 +1,12 @@
+import { useEffect } from "react";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import EventCard from "../components/EventCard.jsx";
 import { Link } from "react-router-dom";
 
 export default function Favorites() {
-  const { favs } = useFavorites();
+  const { favs, markFavoritesSeen } = useFavorites();
+
+  useEffect(() => { markFavoritesSeen(); }, [favs.length]);
 
   return (
     <div className="container-app py-6 sm:py-10">

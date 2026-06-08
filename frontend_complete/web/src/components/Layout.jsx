@@ -47,7 +47,7 @@ export default function Layout() {
                 </span>
               )}
             </NavLink>
-            {isAuthed && <NavLink to="/admin" className={linkClass}>Mes événements</NavLink>}
+            {isAuthed && <NavLink to="/admin?tab=mine" className={linkClass}>Mes événements</NavLink>}
             {user?.role === 'admin' && <NavLink to="/admin?tab=all" className={linkClass}>Tous les événements</NavLink>}
           </nav>
 
@@ -92,7 +92,7 @@ export default function Layout() {
                 { to: "/", label: "Accueil", end: true },
                 { to: "/mes-reservations", label: "Mes réservations" },
                 { to: "/favoris", label: `Favoris${favs.length > 0 ? ` (${favs.length})` : ""}` },
-                ...(isAuthed ? [{ to: "/admin", label: "Mes événements" }] : []),
+                ...(isAuthed ? [{ to: "/admin?tab=mine", label: "Mes événements" }] : []),
                 ...(user?.role === 'admin' ? [{ to: "/admin?tab=all", label: "Tous les événements" }] : []),
               ].map(({ to, label, end }) => (
                 <NavLink key={to} to={to} end={end} onClick={close}

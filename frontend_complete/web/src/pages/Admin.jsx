@@ -8,7 +8,11 @@ import { motion } from "framer-motion";
 export default function Admin() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") === "all" && user?.role === 'admin' ? "all" : "events";
+  const requestedTab = searchParams.get("tab");
+  const initialTab =
+    requestedTab === "all" && user?.role === 'admin' ? "all" :
+    requestedTab === "mine" ? "mine" :
+    "events";
   const [tab, setTab] = useState(initialTab); // events | mine | all | reservations
   const [editingId, setEditingId] = useState(null);
   const [reservations, setReservations] = useState([]);

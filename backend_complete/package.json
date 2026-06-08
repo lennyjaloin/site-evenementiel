@@ -8,8 +8,7 @@
     "test:watch": "vitest",
     "start": "node server.mjs",
     "dev": "nodemon server.mjs",
-    "prod": "set NODE_ENV=production && node server.mjs",
-    "db:init": "node createTables.js"
+    "prod": "set NODE_ENV=production && node server.mjs"
   },
   "keywords": [],
   "author": "",

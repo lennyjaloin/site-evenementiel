@@ -8,6 +8,15 @@ const Reservation = {
     const [ev] = await db.select().from(events).where(eq(events.id, event_id));
     if (!ev) throw Object.assign(new Error('Evenement introuvable'), { status: 404 });
 
+    const [existing] = await db
+      .select()
+      .from(reservations)
+      .where(and(eq(reservations.event_id, event_id), eq(reservations.email, email)));
+
+    if (existing && existing.status === 'confirmed') {
+      throw Object.assign(new Error('Déjà réservé avec cet email.'), { status: 400 });
+    }
+
     if (ev.capacity != null) {
       const [{ total }] = await db
         .select({ total: count() })
@@ -24,6 +33,15 @@ const Reservation = {
           { status: 400 }
         );
       }
+    }
+
+    if (existing) {
+      await db
+        .update(reservations)
+        .set({ nom, prenom, status: 'confirmed' })
+        .where(eq(reservations.id, existing.id));
+      const [row] = await db.select().from(reservations).where(eq(reservations.id, existing.id));
+      return row;
     }
 
     const [result] = await db

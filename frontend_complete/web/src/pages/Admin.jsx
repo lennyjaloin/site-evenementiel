@@ -171,6 +171,9 @@ export default function Admin() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={()=>setTab("events")} className={`text-xs sm:text-sm ${tab==="events"?"btn-primary":"btn-secondary"}`}>Evenements</button>
+          {user?.role === 'admin' && (
+            <button onClick={()=>setTab("all")} className={`text-xs sm:text-sm ${tab==="all"?"btn-primary":"btn-secondary"}`}>Tous les evenements</button>
+          )}
           <button onClick={()=>setTab("mine")} className={`text-xs sm:text-sm ${tab==="mine"?"btn-primary":"btn-secondary"}`}>Mes evenements</button>
           <button onClick={()=>setTab("reservations")} className={`text-xs sm:text-sm ${tab==="reservations"?"btn-primary":"btn-secondary"}`}>Reservations</button>
           <button onClick={load} className="btn-ghost text-xs sm:text-sm">Rafraichir</button>
@@ -181,7 +184,7 @@ export default function Admin() {
       {err && <div className="text-danger mb-4">{err}</div>}
 
       {!loading && tab==="events" && (
-        <div className="grid lg:grid-cols-2 gap-4">
+        <div className="grid gap-4 max-w-2xl">
           <div className="card p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg">{editingId ? "Modifier l'evenement" : "Creer un evenement"}</h3>
@@ -285,26 +288,26 @@ export default function Admin() {
               </button>
             </form>
           </div>
+        </div>
+      )}
 
-          <div className="card p-5">
-            <h3 className="font-semibold text-lg mb-3">Liste des evenements</h3>
-            <div className="space-y-2 max-h-[520px] overflow-auto pr-2">
-              {events.map(ev => (
-                <div key={ev.id} className="flex items-start justify-between gap-3 p-3 rounded-xl bg-bgSoft">
-                  <div>
-                    <div className="font-semibold">{ev.title}</div>
-                    <div className="text-xs text-neutral-400">{ev.location || "-"} � {ev.date_start ? new Date(ev.date_start).toLocaleString() : "date libre"}</div>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    {(ev.created_by === user?.id || user?.role === 'admin') && (
-                      <button onClick={()=>onEditEvent(ev)} className="btn-ghost text-xs sm:text-sm">Modifier</button>
-                    )}
-                    <button onClick={()=>onDeleteEvent(ev.id)} className="btn-ghost text-danger">Suppr.</button>
-                  </div>
+      {!loading && tab==="all" && user?.role === 'admin' && (
+        <div className="card p-5">
+          <h3 className="font-semibold text-lg mb-3">Tous les evenements</h3>
+          <div className="space-y-2 max-h-[520px] overflow-auto pr-2">
+            {events.map(ev => (
+              <div key={ev.id} className="flex items-start justify-between gap-3 p-3 rounded-xl bg-bgSoft">
+                <div>
+                  <div className="font-semibold">{ev.title}</div>
+                  <div className="text-xs text-neutral-400">{ev.location || "-"} · {ev.date_start ? new Date(ev.date_start).toLocaleString() : "date libre"}</div>
                 </div>
-              ))}
-              {events.length===0 && <p className="text-neutral-400 text-sm">Aucun evenement.</p>}
-            </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={()=>onEditEvent(ev)} className="btn-ghost text-xs sm:text-sm">Modifier</button>
+                  <button onClick={()=>onDeleteEvent(ev.id)} className="btn-ghost text-danger">Suppr.</button>
+                </div>
+              </div>
+            ))}
+            {events.length===0 && <p className="text-neutral-400 text-sm">Aucun evenement.</p>}
           </div>
         </div>
       )}

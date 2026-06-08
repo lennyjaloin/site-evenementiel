@@ -177,12 +177,18 @@ export default function Admin() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <button onClick={()=>setTab("events")} className={`text-xs sm:text-sm ${tab==="events"?"btn-primary":"btn-secondary"}`}>Evenements</button>
-          <button onClick={()=>setTab("mine")} className={`text-xs sm:text-sm ${tab==="mine"?"btn-primary":"btn-secondary"}`}>Mes evenements</button>
-          {user?.role === 'admin' && (
-            <button onClick={()=>setTab("all")} className={`text-xs sm:text-sm ${tab==="all"?"btn-primary":"btn-secondary"}`}>Tous les evenements</button>
+          {tab === "mine" ? (
+            <button onClick={()=>setTab("events")} className="btn-ghost text-xs sm:text-sm">&larr; Retour</button>
+          ) : (
+            <>
+              <button onClick={()=>setTab("events")} className={`text-xs sm:text-sm ${tab==="events"?"btn-primary":"btn-secondary"}`}>Evenements</button>
+              <button onClick={()=>setTab("mine")} className={`text-xs sm:text-sm ${tab==="mine"?"btn-primary":"btn-secondary"}`}>Mes evenements</button>
+              {user?.role === 'admin' && (
+                <button onClick={()=>setTab("all")} className={`text-xs sm:text-sm ${tab==="all"?"btn-primary":"btn-secondary"}`}>Tous les evenements</button>
+              )}
+              <button onClick={()=>setTab("reservations")} className={`text-xs sm:text-sm ${tab==="reservations"?"btn-primary":"btn-secondary"}`}>Reservations</button>
+            </>
           )}
-          <button onClick={()=>setTab("reservations")} className={`text-xs sm:text-sm ${tab==="reservations"?"btn-primary":"btn-secondary"}`}>Reservations</button>
           <button onClick={load} className="btn-ghost text-xs sm:text-sm">Rafraichir</button>
         </div>
       </motion.div>

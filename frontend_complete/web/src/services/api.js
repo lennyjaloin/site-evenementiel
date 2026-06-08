@@ -96,6 +96,11 @@ export async function reserveEvent({ event_id, nom, prenom, email }) {
   return data;
 }
 
+export async function getMyConfirmedReservationsCount() {
+  const { data } = await api.get("/api/reservations/mine/count");
+  return data.count ?? 0;
+}
+
 export async function getReservations() {
   const { data } = await api.get("/api/reservations");
   return Array.isArray(data) ? data : (data.reservations || []);

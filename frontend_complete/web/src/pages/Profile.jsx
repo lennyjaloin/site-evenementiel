@@ -1,8 +1,23 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getMyConfirmedReservationsCount } from "../services/api.js";
 import { motion } from "framer-motion";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, isAuthed } = useAuth();
+  const [reservationsCount, setReservationsCount] = useState(null);
+
+  useEffect(() => {
+    if (!isAuthed) return;
+    (async () => {
+      try {
+        const count = await getMyConfirmedReservationsCount();
+        setReservationsCount(count);
+      } catch {
+        setReservationsCount(null);
+      }
+    })();
+  }, [isAuthed]);
 
   return (
     <section className="container-app py-6 sm:py-10">
@@ -15,6 +30,10 @@ export default function Profile() {
             <div><span className="text-neutral-400">Email :</span> <span className="break-all">{user.email}</span></div>
             {user.username && <div><span className="text-neutral-400">Pseudo :</span> {user.username}</div>}
             {user.role && <div><span className="text-neutral-400">Rôle :</span> <span className="capitalize">{user.role}</span></div>}
+            <div>
+              <span className="text-neutral-400">Réservations confirmées :</span>{" "}
+              {reservationsCount === null ? "—" : reservationsCount}
+            </div>
           </div>
         )}
       </motion.div>

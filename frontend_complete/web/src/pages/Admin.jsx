@@ -41,7 +41,7 @@ export default function Admin() {
   const load = async () => {
     setLoading(true); setErr("");
     try {
-      const [r, e] = await Promise.all([getReservations(), getEvents()]);
+      const [r, e] = await Promise.all([getReservations(), getEvents({ limit: 100 })]);
       setReservations(r);
       setEvents(e.data || []);
     } catch (e2) {
@@ -68,6 +68,14 @@ export default function Admin() {
       created_at: r.createdAt
     }));
   }, [reservations, events, filterEventId]);
+
+  const stats = useMemo(() => {
+    const withCapacity = events.filter(ev => ev.capacity != null && ev.capacity > 0);
+    const avgFillRate = withCapacity.length
+      ? (withCapacity.reduce((sum, ev) => sum + (ev.reservationsCount || 0) / ev.capacity, 0) / withCapacity.length) * 100
+      : 0;
+    return { total: events.length, avgFillRate };
+  }, [events]);
 
   const myEvents = useMemo(
     () => events.filter(ev => ev.created_by === user?.id),
@@ -192,6 +200,19 @@ export default function Admin() {
           <button onClick={load} className="btn-ghost text-xs sm:text-sm">Rafraichir</button>
         </div>
       </motion.div>
+
+      {!loading && (
+        <div className="grid grid-cols-2 gap-3 mb-6 max-w-md">
+          <div className="card p-4">
+            <div className="text-2xl font-bold">{stats.total}</div>
+            <div className="text-xs text-neutral-400">Evenements crees</div>
+          </div>
+          <div className="card p-4">
+            <div className="text-2xl font-bold">{stats.avgFillRate.toFixed(1)}%</div>
+            <div className="text-xs text-neutral-400">Taux de remplissage moyen</div>
+          </div>
+        </div>
+      )}
 
       {loading && <div className="text-neutral-400">Chargement...</div>}
       {err && <div className="text-danger mb-4">{err}</div>}

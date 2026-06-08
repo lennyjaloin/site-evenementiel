@@ -88,6 +88,19 @@ const Reservation = {
     return db.delete(reservations).where(eq(reservations.id, id));
   },
 
+  async countConfirmedByEmail(email) {
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.email, email),
+          eq(reservations.status, 'confirmed')
+        )
+      );
+    return total;
+  },
+
   async countByEvent(event_id) {
     const [{ total }] = await db
       .select({ total: count() })

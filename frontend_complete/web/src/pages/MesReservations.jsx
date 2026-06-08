@@ -83,7 +83,8 @@ export default function MesReservations() {
           {reservations.map(r => (
             <div key={r.id} className="card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <p className="font-semibold">{r.nom} {r.prenom}</p>
+                <p className="font-semibold">{r.eventTitle}</p>
+                <p className="text-sm text-neutral-300 mt-0.5">{r.nom} {r.prenom}</p>
                 <p className="text-xs text-neutral-400 mt-0.5">{r.email}</p>
                 <p className="text-xs text-neutral-500 mt-1">
                   Réservé le {new Date(r.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}

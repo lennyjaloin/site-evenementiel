@@ -26,6 +26,16 @@ export const createReservation = async (req, res, next) => {
   }
 };
 
+export const getMyConfirmedCount = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'Utilisateur introuvable' });
+
+    const count = await Reservation.countConfirmedByEmail(user.email);
+    res.json({ count });
+  } catch (err) { next(err); }
+};
+
 export const listReservations = async (req, res, next) => {
   try {
     const rows = await Reservation.getAll();

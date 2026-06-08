@@ -177,7 +177,7 @@ export default function Admin() {
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {tab === "mine" ? (
+          {tab === "mine" || tab === "all" ? (
             <button onClick={()=>setTab("events")} className="btn-ghost text-xs sm:text-sm">&larr; Retour</button>
           ) : (
             <>

@@ -18,7 +18,7 @@ export default function MesReservations() {
     (async () => {
       try {
         const data = await getReservations();
-        const mine = data.filter(r => r.email === user?.email);
+        const mine = data.filter(r => r.email === user?.email && r.status !== "cancelled");
         setReservations(mine);
       } catch (e) { setErr(e.message); }
       finally { setLoading(false); }
@@ -90,17 +90,15 @@ export default function MesReservations() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`text-xs px-2 py-1 rounded-full font-semibold ${r.status === "confirmed" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"}`}>
-                  {r.status === "confirmed" ? "Confirmée" : "Annulée"}
+                <span className="text-xs px-2 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-400">
+                  Confirmée
                 </span>
                 <Link to={`/events/${r.eventId}`} className="btn-secondary text-xs">
                   Voir l'événement
                 </Link>
-                {r.status === "confirmed" && (
-                  <button onClick={() => onCancel(r.id)} className="btn-ghost text-danger text-xs">
-                    Annuler
-                  </button>
-                )}
+                <button onClick={() => onCancel(r.id)} className="btn-ghost text-danger text-xs">
+                  Annuler
+                </button>
               </div>
             </div>
           ))}

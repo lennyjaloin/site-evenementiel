@@ -62,6 +62,11 @@ export default function Admin() {
     }));
   }, [reservations, events, filterEventId]);
 
+  const myEvents = useMemo(
+    () => events.filter(ev => ev.created_by === user?.id),
+    [events, user]
+  );
+
   const onDeleteReservation = async (id) => {
     if (!confirm("Supprimer cette reservation ?")) return;
     try {
@@ -164,6 +169,7 @@ export default function Admin() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={()=>setTab("events")} className={`text-xs sm:text-sm ${tab==="events"?"btn-primary":"btn-secondary"}`}>Evenements</button>
+          <button onClick={()=>setTab("mine")} className={`text-xs sm:text-sm ${tab==="mine"?"btn-primary":"btn-secondary"}`}>Mes evenements</button>
           <button onClick={()=>setTab("reservations")} className={`text-xs sm:text-sm ${tab==="reservations"?"btn-primary":"btn-secondary"}`}>Reservations</button>
           <button onClick={load} className="btn-ghost text-xs sm:text-sm">Rafraichir</button>
         </div>
@@ -297,6 +303,27 @@ export default function Admin() {
               ))}
               {events.length===0 && <p className="text-neutral-400 text-sm">Aucun evenement.</p>}
             </div>
+          </div>
+        </div>
+      )}
+
+      {!loading && tab==="mine" && (
+        <div className="card p-5">
+          <h3 className="font-semibold text-lg mb-3">Mes evenements</h3>
+          <div className="space-y-2">
+            {myEvents.map(ev => (
+              <div key={ev.id} className="flex items-start justify-between gap-3 p-3 rounded-xl bg-bgSoft">
+                <div>
+                  <div className="font-semibold">{ev.title}</div>
+                  <div className="text-xs text-neutral-400">{ev.location || "-"} · {ev.date_start ? new Date(ev.date_start).toLocaleString() : "date libre"}</div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={()=>onEditEvent(ev)} className="btn-ghost text-xs sm:text-sm">Modifier</button>
+                  <button onClick={()=>onDeleteEvent(ev.id)} className="btn-ghost text-danger">Suppr.</button>
+                </div>
+              </div>
+            ))}
+            {myEvents.length===0 && <p className="text-neutral-400 text-sm">Tu n'as encore cree aucun evenement.</p>}
           </div>
         </div>
       )}

@@ -162,7 +162,9 @@ export default function Admin() {
       <motion.div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6"
         initial={{opacity:0,y:6}} animate={{opacity:1,y:0}}>
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold">Admin</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold">
+            {user?.role === 'admin' ? 'Admin' : `Cree ton evenement, ${user?.username || ''}`}
+          </h2>
           <p className="text-neutral-400 text-xs sm:text-sm mt-1">
             Cree tes evenements et gere les reservations.
           </p>

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { getReservations, cancelReservation } from "../services/api.js";
+import { getReservations, cancelReservation, restoreReservation } from "../services/api.js";
 import { Link } from "react-router-dom";
 
 export default function MesReservations() {
@@ -8,6 +8,10 @@ export default function MesReservations() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [undoToast, setUndoToast] = useState(null);
+  const undoTimerRef = useRef(null);
+
+  useEffect(() => () => clearTimeout(undoTimerRef.current), []);
 
   useEffect(() => {
     if (!isAuthed) return;
@@ -23,9 +27,27 @@ export default function MesReservations() {
 
   const onCancel = async (id) => {
     if (!confirm("Annuler cette réservation ?")) return;
+    const reservation = reservations.find(r => r.id === id);
     try {
       await cancelReservation(id);
-      setReservations(prev => prev.map(r => r.id === id ? { ...r, status: "cancelled" } : r));
+      setReservations(prev => prev.filter(r => r.id !== id));
+
+      clearTimeout(undoTimerRef.current);
+      setUndoToast(reservation || { id });
+      undoTimerRef.current = setTimeout(() => setUndoToast(null), 6000);
+    } catch (e) {
+      alert(e.response?.data?.message || e.message);
+    }
+  };
+
+  const onUndoCancel = async () => {
+    if (!undoToast) return;
+    const reservation = undoToast;
+    clearTimeout(undoTimerRef.current);
+    setUndoToast(null);
+    try {
+      await restoreReservation(reservation.id);
+      setReservations(prev => [{ ...reservation, status: "confirmed" }, ...prev]);
     } catch (e) {
       alert(e.response?.data?.message || e.message);
     }
@@ -82,6 +104,15 @@ export default function MesReservations() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {undoToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 card px-4 py-3 flex items-center gap-4 shadow-xl">
+          <span className="text-sm">Annulation confirmée</span>
+          <button onClick={onUndoCancel} className="btn-secondary text-xs">
+            Annuler
+          </button>
         </div>
       )}
     </div>

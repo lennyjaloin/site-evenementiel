@@ -55,6 +55,28 @@ export const cancelReservation = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+export const restoreReservation = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const reservation = await Reservation.findById(id);
+    if (!reservation) return res.status(404).json({ message: 'Réservation introuvable' });
+
+    if (req.user.role !== 'admin') {
+      const user = await User.findById(req.user.id);
+      if (!user || user.email !== reservation.email) {
+        return res.status(403).json({ message: 'Accès refusé' });
+      }
+    }
+
+    if (reservation.status !== 'cancelled') {
+      return res.status(400).json({ message: 'Réservation non annulée' });
+    }
+
+    await Reservation.restore(id);
+    res.json({ message: 'Réservation restaurée' });
+  } catch (err) { next(err); }
+};
+
 export const deleteReservation = async (req, res, next) => {
   try {
     await Reservation.delete(Number(req.params.id));

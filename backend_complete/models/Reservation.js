@@ -62,6 +62,10 @@ const Reservation = {
     return db.update(reservations).set({ status: 'cancelled' }).where(eq(reservations.id, id));
   },
 
+  async restore(id) {
+    return db.update(reservations).set({ status: 'confirmed' }).where(eq(reservations.id, id));
+  },
+
   async delete(id) {
     return db.delete(reservations).where(eq(reservations.id, id));
   },

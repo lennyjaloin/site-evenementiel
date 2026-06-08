@@ -106,6 +106,11 @@ export async function cancelReservation(id) {
   return data;
 }
 
+export async function restoreReservation(id) {
+  const { data } = await api.patch(`/api/reservations/${id}/restore`);
+  return data;
+}
+
 export async function deleteReservation(id) {
   const { data } = await api.delete(`/api/reservations/${id}`);
   return data;

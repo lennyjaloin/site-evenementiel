@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AdminTable from "../components/AdminTable.jsx";
 import { createEvent, updateEvent, deleteEvent, getEvents, getReservations, deleteReservation, uploadImage } from "../services/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -6,7 +7,9 @@ import { motion } from "framer-motion";
 
 export default function Admin() {
   const { user } = useAuth();
-  const [tab, setTab] = useState("events"); // events | reservations
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") === "all" && user?.role === 'admin' ? "all" : "events";
+  const [tab, setTab] = useState(initialTab); // events | mine | all | reservations
   const [editingId, setEditingId] = useState(null);
   const [reservations, setReservations] = useState([]);
   const [events, setEvents] = useState([]);
